@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/mainActivity"
+    tools:ignore="UnusedNavigation">
+
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.aslanovaslan.skypeclone.ui.home.Contacts"
+        android:label="activity_main"
+        tools:layout="@layout/activity_contacts" />
+    <activity
+        android:id="@+id/notificationActivity"
+        android:name="com.aslanovaslan.skypeclone.ui.notifications.NotificationActivity"
+        android:label="activity_notification"
+        tools:layout="@layout/activity_notification" />
+    <activity
+        android:id="@+id/settings"
+        android:name="com.aslanovaslan.skypeclone.ui.settings.Settings"
+        android:label="activity_settings"
+        tools:layout="@layout/activity_settings" />
+</navigation>

@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Skype Clone</string>
+    <string name="write_you_code_here">Write you code here…</string>
+    <string name="_504264608">504264608</string>
+    <string name="phone_number">Phone Number:</string>
+    <string name="continue_register">Continue</string>
+    <string name="title_main_activity">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_logout">Logout</string>
+    <string name="image_view_contacts">image view contacts</string>
+    <string name="contacts">Contacts</string>
+    <string name="notification">Notification</string>
+    <string name="settings">Settings</string>
+    <string name="search_here_friends">Search friends here…</string>
+    <string name="find_friend_image">Find friend image</string>
+    <string name="username_find_friends">Username</string>
+    <string name="button_call_friend">Button</string>
+    <string name="accept_friend_request">Accept Friend Request</string>
+    <string name="cancel_friend_request">Cancel Friend Request</string>
+    <string name="write_your_bio">write your bio</string>
+    <string name="write_your_name_here">write your name here</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="user_profile_image">user profile image</string>
+    <string name="appInfo_logout">Lorem Ipsum is simply dummy text of the printing and
+        typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text
+        ever since the 1500s, when an unknown printer took a galley of type and scrambled
+        it to make a type specimen book. It has survived not only five centuries, but also
+        the leap into electronic typesetting, remaining essentially unchanged. It was popularised
+        in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more
+        recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+    <string name="logout">Logout</string>
+    <string name="read_more">Read More</string>
+</resources>
