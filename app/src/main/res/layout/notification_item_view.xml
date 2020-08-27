@@ -2,70 +2,86 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:id="@+id/cardViewNotification"
+    android:layout_height="200dp"
     android:layout_margin="5dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:id="@+id/cardViewNotification"
         android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/imageViewNotification"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="32dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:contentDescription="@string/find_friend_image"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
             tools:srcCompat="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/textViewUserName"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:textStyle="bold"
+            android:textAlignment="viewEnd"
+            android:layout_marginEnd="8dp"
             android:text="@string/username_find_friends"
-            android:textColor="@android:color/black"
-            app:layout_constraintEnd_toEndOf="@+id/imageViewNotification"
-            app:layout_constraintStart_toStartOf="@+id/imageViewNotification"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewNotification" />
-
-        <Button
-            android:id="@+id/buttonAcceptFriendRequest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/ic_baseline_check_24"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/buttonCancelFriendRequest"
-            app:layout_constraintEnd_toEndOf="@+id/imageViewNotification"
-            app:layout_constraintStart_toEndOf="@+id/textViewUserName"
-            app:layout_constraintTop_toBottomOf="@+id/textViewUserName" />
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/progressBarNotficationView"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/buttonCancelFriendRequest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+        <ImageView
+            android:id="@+id/buttonAcceptFriendRequestNotification"
+            android:layout_width="60dp"
+            android:layout_height="0dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/ic_baseline_close_24"
+            android:src="@drawable/ic_baseline_check_24"
+            android:background="@drawable/decline_button_back"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textViewUserName"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewNotification"
+            app:layout_constraintStart_toEndOf="@+id/progressBarNotficationView"
+            app:layout_constraintTop_toBottomOf="@+id/progressBarNotficationView"
+            android:contentDescription="@string/todo" />
+
+        <ImageView
+            android:id="@+id/buttonCancelFriendRequestNotification"
+            android:layout_width="60dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_baseline_close_24"
+            android:background="@drawable/yes_button_back"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/progressBarNotficationView"
             app:layout_constraintStart_toStartOf="@+id/imageViewNotification"
-            app:layout_constraintTop_toBottomOf="@+id/textViewUserName"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toBottomOf="@+id/progressBarNotficationView"
+            android:contentDescription="@string/todo" />
+
+        <ProgressBar
+            android:id="@+id/progressBarNotficationView"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textViewUserName" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

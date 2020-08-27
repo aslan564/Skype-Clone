@@ -32,4 +32,14 @@
         recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
     <string name="logout">Logout</string>
     <string name="read_more">Read More</string>
+    <string name="other_people_profile">other people profile</string>
+    <string name="resent_code">resent code</string>
+    <string name="username_contact">Username</string>
+    <string name="contact_calling_image">Contact Calling Image</string>
+    <string name="contact_profile_image">Contact profile image</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="username_call_activity">Username</string>
+    <string name="calling">.......</string>
+    <string name="video_chat">video chat</string>
+    <string name="todo">TODO</string>
 </resources>

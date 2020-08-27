@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "868257405825-so2fb0uakqgmf1eba8oml5dc05png9o5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aslanovaslan.skypeclone",
+            "certificate_hash": "fc66e34f99f871ef34ec6b398bbfd2e635c35333"
+          }
+        },
+        {
           "client_id": "868257405825-4n47tu6bm8rhd2qrgm2e3522dql5mp1f.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -11,7 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_start"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.ProfileActivity"></activity>
+        <activity android:name=".ui.videocating.VideoChatActivity" />
+        <activity android:name=".author.AuthorActivity" />
+        <activity android:name=".activity.CallVideoActivity" />
+        <activity android:name=".activity.ProfileActivity" />
         <activity android:name=".ui.notifications.NotificationActivity" />
         <activity android:name=".activity.FindPeopleActivity">
             <meta-data
@@ -19,7 +22,7 @@
                 android:value=".ui.home.Contacts" />
         </activity>
         <activity android:name=".ui.settings.Settings" />
-        <activity android:name=".ui.logout.Logout"></activity>
+        <activity android:name=".ui.logout.Logout" />
         <activity android:name=".ui.home.Contacts">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity" />
     </application>
 
 </manifest>

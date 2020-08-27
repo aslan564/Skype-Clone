@@ -23,10 +23,10 @@ import android.widget.Toast;
 
 import com.aslanovaslan.skypeclone.R;
 import com.aslanovaslan.skypeclone.RegisterActivity;
-import com.aslanovaslan.skypeclone.RegisterModel;
-import com.aslanovaslan.skypeclone.ui.notifications.NotificationActivity;
+import com.aslanovaslan.skypeclone.model.UserModel;
 import com.aslanovaslan.skypeclone.util.BottomNavigationHelper;
 import com.aslanovaslan.skypeclone.util.glide.GlideApp;
+import com.aslanovaslan.skypeclone.util.internal.MessageEvent;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,6 +41,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,7 +53,7 @@ public class Settings extends AppCompatActivity implements View.OnClickListener 
 private BottomNavigationView navView;
 private ImageView imageViewUserProfile;
 private Button buttonSettingSave;
-private ProgressBar progressBarSettings;
+private ProgressBar progressBarSettings,progressBarSettingsImage;
 private Uri imageUri = null;
 private static int AA_SELECT_IMAGE = 101;
 private EditText editTextTextPersonName, editTextTextPersonBio;
@@ -59,9 +61,7 @@ private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationHe
 
 private StorageReference userProfileImagePath;
 private DocumentReference userDocumentReference;
-private FirebaseAuth mAuth;
 private FirebaseUser mUser;
-private Task<Uri> downloadUrl;
 private byte[] selectedImageBytes = null;
 
 private static final String TAG = "Settingsqaqaqa";
@@ -81,6 +81,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
     if (mUser != null) {
         progressBarState(View.VISIBLE);
+
         getCurrentUserData();
     }else {
         checkUserState();
@@ -94,30 +95,26 @@ private void checkUserState( ) {
     finish();
 }
 private void getCurrentUserData() {
-    userDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-        @Override
-        public void onSuccess(DocumentSnapshot documentSnapshot) {
-            if (documentSnapshot.exists()) {
-                RegisterModel registerModel = documentSnapshot.toObject(RegisterModel.class);
-                assert registerModel != null;
-                if (!registerModel.getNameSurname().equals(""))editTextTextPersonName.setHint(registerModel.getNameSurname() );
-                if (!registerModel.getUserBio().equals(""))editTextTextPersonBio.setHint(registerModel.getUserBio() );
-                if (!registerModel.getProfilePicturePath().equals("")) {
-                   GlideApp.with(Settings.this)
-                           .load(registerModel.getProfilePicturePath())
-                           .placeholder(R.drawable.ic_baseline_person_pin_24)
-                           .into(imageViewUserProfile);
+    userDocumentReference
+            .get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    UserModel userModel = documentSnapshot.toObject(UserModel.class);
+                    assert userModel != null;
+                    if (!userModel.getNameSurname().equals(""))editTextTextPersonName.setHint(userModel.getNameSurname() );
+                    if (!userModel.getUserBio().equals(""))editTextTextPersonBio.setHint(userModel.getUserBio() );
+                    if (!userModel.getProfilePicturePath().equals("")) {
+                       GlideApp.with(Settings.this)
+                               .load(userModel.getProfilePicturePath())
+                               .placeholder(R.drawable.ic_baseline_person_pin_24)
+                               .into(imageViewUserProfile);
+                        progressBarSettingsImage.setVisibility(View.GONE);
+
+                    }
+
+                    progressBarState(View.GONE);
 
                 }
-                progressBarState(View.GONE);
-            }
-        }
-    }).addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            e.printStackTrace();
-        }
-    });
+            }).addOnFailureListener(e -> e.printStackTrace());
 }
 
 private void initializeVariable() {
@@ -126,9 +123,10 @@ private void initializeVariable() {
     editTextTextPersonName = findViewById(R.id.editTextTextPersonName);
     editTextTextPersonBio = findViewById(R.id.editTextTextPersonBio);
     progressBarSettings = findViewById(R.id.progressBarSettings);
+    progressBarSettingsImage = findViewById(R.id.progressBarSettingsImage);
     buttonSettingSave = findViewById(R.id.buttonSettingSave);
     userProfileImagePath = FirebaseStorage.getInstance().getReference().child("Images");
-    mAuth = FirebaseAuth.getInstance();
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
     mUser = mAuth.getCurrentUser();
     if (mUser != null) {
         userDocumentReference = FirebaseFirestore.getInstance().collection("users").document(mUser.getUid());
@@ -150,7 +148,6 @@ public void onClick(View view) {
     switch (view.getId()) {
         case R.id.buttonSettingSave:
             checkInputs();
-            progressBarState(View.VISIBLE);
             break;
         case R.id.imageViewUserProfile:
             uploadImageProfile();
@@ -159,43 +156,43 @@ public void onClick(View view) {
 }
 
 private void checkInputs() {
+    progressBarState(View.VISIBLE);
     final String bioData = editTextTextPersonBio.getText().toString();
     final String nameData = editTextTextPersonName.getText().toString();
 
     if (Objects.equals(bioData, "")) {
+        progressBarState(View.GONE);
         editTextTextPersonBio.setError("Bio text require");
         editTextTextPersonBio.requestFocus();
-        progressBarState(View.GONE);
         Log.d(TAG, "checkInputs: bio melumati doldurulmuyub");
     } else if (Objects.equals(nameData, "")) {
+        progressBarState(View.GONE);
         editTextTextPersonName.setError("Name is require");
         editTextTextPersonName.requestFocus();
-        progressBarState(View.GONE);
         Log.d(TAG, "checkInputs: ad soyad doldurulmuyub");
     } else {
         if (selectedImageBytes == null) {
-            Log.d(TAG, "checkInputs: sekil yoxdu ");
-            userDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    RegisterModel registerModel = documentSnapshot.toObject(RegisterModel.class);
-                    if (registerModel != null) {
-                        if (registerModel.getProfilePicturePath().equals("")) {
-                            progressBarState(View.GONE);
+            Log.d(TAG, "checkInputs: sekil secilmeyib ");
+            userDocumentReference
+                    .get().addOnSuccessListener(documentSnapshot -> {
+                        UserModel userModel = documentSnapshot.toObject(UserModel.class);
+                        if (userModel != null) {
+                            if (userModel.getProfilePicturePath().equals("")) {
+                                progressBarState(View.GONE);
 
-                            Toast.makeText(Settings.this, "please select image first time", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "onSuccess: sekil yoxdu");
-                        } else {
-                            Log.d(TAG, "onSuccess: " + registerModel.getProfilePicturePath());
-                            HashMap<String, Object> updateUser = new HashMap<>();
-                            updateUser.put("nameSurname", nameData);
-                            updateUser.put("userBio", bioData);
+                                Toast.makeText(Settings.this, "please select image first time", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "onSuccess: sekil yoxdu");
+                            } else {
+                                Log.d(TAG, "onSuccess: " + userModel.getProfilePicturePath());
+                                HashMap<String, Object> updateUser = new HashMap<>();
+                                updateUser.put("nameSurname", nameData);
+                                updateUser.put("userBio", bioData);
+                                updateUser.put("uid", mUser.getUid());
 
-                            updateUserToFirestore(updateUser);
+                                updateUserToFirestore(updateUser);
+                            }
                         }
-                    }
-                }
-            });
+                    });
 
         } else {
 
@@ -207,27 +204,23 @@ private void checkInputs() {
 }
 
 private void updateUserToFirestore(HashMap<String, Object> updateUser) {
-    userDocumentReference.update(updateUser).addOnSuccessListener(new OnSuccessListener<Void>() {
-        @Override
-        public void onSuccess(Void aVoid) {
-            Toast.makeText(Settings.this, "profile updated", Toast.LENGTH_SHORT).show();
-            progressBarState(View.GONE);
-        }
-    }).addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "onFailure: ", e);
-            Toast.makeText(Settings.this, "profile not updated", Toast.LENGTH_SHORT).show();
-            progressBarState(View.GONE);
-        }
+    String uid=mUser.getUid();
+    DocumentReference reference = FirebaseFirestore.getInstance().collection("users").document(uid);
+    reference.update(updateUser).addOnSuccessListener(aVoid -> {
+        Toast.makeText(Settings.this, "profile updated", Toast.LENGTH_SHORT).show();
+        progressBarState(View.GONE);
+    }).addOnFailureListener(e -> {
+        e.printStackTrace();
+        Log.e(TAG, "onFailure: ", e);
+        Toast.makeText(Settings.this, "profile not updated", Toast.LENGTH_SHORT).show();
+        progressBarState(View.GONE);
     });
 }
 
 
 
-private void progressBarState(int gone) {
-    progressBarSettings.setVisibility(gone);
+private void progressBarState(int state) {
+    progressBarSettings.setVisibility(state);
 }
 
 private void uploadImageStorage(final byte[] selectedImageBytes, final String bioData, final String nameData) {
@@ -236,32 +229,22 @@ private void uploadImageStorage(final byte[] selectedImageBytes, final String bi
             UUID uuid = UUID.nameUUIDFromBytes(selectedImageBytes);
             final StorageReference storageReference = userProfileImagePath.child(("profile/" + uuid));
 
-            storageReference.putBytes(selectedImageBytes).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            storageReference.putBytes(selectedImageBytes).addOnSuccessListener(taskSnapshot -> storageReference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                 @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    downloadUrl = storageReference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.getResult() != null) {
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.getResult() != null) {
 
-                                HashMap<String, Object> updateUser = new HashMap<>();
-                                updateUser.put("nameSurname", nameData);
-                                updateUser.put("userBio", bioData);
-                                updateUser.put("profilePicturePath", task.getResult());
-
-                                updateUserToFirestore(updateUser);
-                            }
-                        }
-                    });
-
-
+                        HashMap<String, Object> updateUser = new HashMap<>();
+                        updateUser.put("nameSurname", nameData);
+                        updateUser.put("userBio", bioData);
+                        updateUser.put("profilePicturePath", task.getResult().toString());
+                        updateUser.put("uid", mUser.getUid());
+                        updateUserToFirestore(updateUser);
+                    }
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "onFailure: ", e);
-                }
+            })).addOnFailureListener(e -> {
+                e.printStackTrace();
+                Log.e(TAG, "onFailure: ", e);
             });
 
 
@@ -298,6 +281,7 @@ private void uploadImageProfile() {
     Intent intent = new Intent().addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     intent.setAction(Intent.ACTION_GET_CONTENT);
     intent.setType("image/*");
+    intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/jpeg", "image/png"});
     startActivityForResult(intent, AA_SELECT_IMAGE);
 
 }
@@ -308,7 +292,6 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 
     if (requestCode == AA_SELECT_IMAGE && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
         imageUri = data.getData();
-        imageViewUserProfile.setImageURI(imageUri);
 
         Bitmap selectedImageBitmap;
         if (imageUri != null) {
@@ -317,7 +300,7 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
                     ImageDecoder.Source sources = ImageDecoder.createSource(this.getContentResolver(), imageUri);
                     selectedImageBitmap = ImageDecoder.decodeBitmap(sources);
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    selectedImageBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+                    selectedImageBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
                     selectedImageBytes = outputStream.toByteArray();
                     // uploadImageStorage(selectedImageBytes);
                 } catch (IOException e) {
@@ -329,7 +312,7 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
                     selectedImageBitmap =
                             MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    selectedImageBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+                    selectedImageBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
                     selectedImageBytes = outputStream.toByteArray();
                     // uploadImageStorage(selectedImageBytes);
                 } catch (IOException e) {
@@ -337,6 +320,9 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
                 }
 
             }
+            GlideApp.with(Settings.this)
+                    .load(selectedImageBytes)
+                    .into(imageViewUserProfile);
         }
     }
 }

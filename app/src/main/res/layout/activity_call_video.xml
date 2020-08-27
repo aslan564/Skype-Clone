@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
+    tools:context=".activity.CallVideoActivity">
+
+    <ImageView
+        android:id="@+id/callActivityUserProfileImage"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_baseline_person_outline_24"
+        android:contentDescription="@string/todo" />
+
+
+
+    <LinearLayout
+        android:id="@+id/linearLayoutCallContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageViewOpenCall"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:background="@drawable/calling_button_back"
+            android:layout_marginEnd="50dp"
+            android:src="@drawable/ic_baseline_call_24"
+            android:visibility="gone" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/circleImageViewCloseCall"
+            android:layout_width="70dp"
+            android:background="@drawable/calling_button_back"
+            android:layout_height="70dp"
+            android:src="@drawable/ic_baseline_call_end_24" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewCallUsername"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/text_view_back"
+        android:padding="3dp"
+        android:text="@string/username_call_activity"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutCallContainer"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayoutCallContainer"
+        app:layout_constraintStart_toStartOf="@+id/linearLayoutCallContainer" />
+
+    <TextView
+        android:id="@+id/textViewCallingUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/calling_background"
+        android:text="@string/calling"
+        android:textColor="@android:color/white"
+        android:textSize="19sp"
+        android:textAlignment="center"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@+id/textViewCallUsername"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayoutCallContainer"
+        app:layout_constraintStart_toStartOf="@+id/linearLayoutCallContainer" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

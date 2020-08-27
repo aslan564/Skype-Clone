@@ -81,26 +81,29 @@
 
 
     <EditText
-            android:id="@+id/codeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayout"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="16dp"
-            android:backgroundTint="@android:color/white"
-            android:drawableStart="@drawable/password"
-            android:drawableTint="@android:color/white"
-            android:hint="@string/write_you_code_here"
-            android:inputType="phone"
-            android:singleLine="true"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" android:autofillHints="" android:layout_marginBottom="24dp" tools:targetApi="m"/>
+        android:id="@+id/codeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:autofillHints=""
+        android:backgroundTint="@android:color/white"
+        android:drawableStart="@drawable/password"
+        android:drawableTint="@android:color/white"
+        android:hint="@string/write_you_code_here"
+        android:inputType="phone"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:targetApi="m" />
 
     <Button
             android:id="@+id/continueNextButton"
@@ -119,5 +122,16 @@
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintVertical_bias="0.381" android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp" android:layout_marginBottom="100dp" android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/textViewResentCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/resent_code"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/codeText"
+        app:layout_constraintStart_toStartOf="@+id/codeText"
+        app:layout_constraintTop_toBottomOf="@+id/codeText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
