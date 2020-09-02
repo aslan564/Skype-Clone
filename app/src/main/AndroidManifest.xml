@@ -10,7 +10,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_start"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor">
+        <activity android:name=".activity.StartActivity"
+            android:theme="@style/SplashTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ui.videocating.VideoChatActivity" />
         <activity android:name=".author.AuthorActivity" />
         <activity android:name=".activity.CallingActivity" />
@@ -23,13 +33,7 @@
         </activity>
         <activity android:name=".ui.settings.Settings" />
         <activity android:name=".ui.logout.Logout" />
-        <activity android:name=".ui.home.Contacts">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".ui.home.Contacts" />
         <activity android:name=".RegisterActivity" />
     </application>
 

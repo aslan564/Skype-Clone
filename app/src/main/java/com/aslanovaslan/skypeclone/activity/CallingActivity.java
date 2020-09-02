@@ -331,12 +331,7 @@ private void setCallingState(CallingStateHelper state) {
     final Map<String, Object> callingModel = new HashMap<>();
     if (state.equals(CallingStateHelper.CLOSE)) {
         callingModel.put("state", CallingStateHelper.CLOSE);
-        talkingRef.child(currentUserID).updateChildren(callingModel).addOnSuccessListener(CallingActivity.this, new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                intentContactActivity();
-            }
-        });
+        talkingRef.child(currentUserID).updateChildren(callingModel).addOnSuccessListener(CallingActivity.this, aVoid -> intentContactActivity());
 
     } else if (state.equals(CallingStateHelper.OPEN)) {
         callingModel.put("state", CallingStateHelper.OPEN);
@@ -425,27 +420,21 @@ private void setCallingAndRinging(final UserModel answeringUserModel) {
                     callingRef
                             .child(currentUserUID)
                             .updateChildren(callingModel)
-                            .addOnSuccessListener(CallingActivity.this, new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
+                            .addOnSuccessListener(CallingActivity.this, aVoid -> {
 
-                                    final Map<String, Object> answeringModel = new HashMap<>();
-                                    answeringModel.put("caller", currentUserUID);
-                                    answeringModel.put("state", CallingStateHelper.WAITING);
+                                final Map<String, Object> answeringModel = new HashMap<>();
+                                answeringModel.put("caller", currentUserUID);
+                                answeringModel.put("state", CallingStateHelper.WAITING);
 
-                                    callingRef
-                                            .child(answeringUserModel.getUid())
-                                            .updateChildren(answeringModel)
-                                            .addOnSuccessListener(CallingActivity.this, new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    textViewCallingUser.setText("Calling…" + answeringUserModel.getNameSurname());
-                                                    circleImageViewCloseCall.setEnabled(true);
-                                                    setCallingState(CallingStateHelper.WAITING);
-                                                }
-                                            });
+                                callingRef
+                                        .child(answeringUserModel.getUid())
+                                        .updateChildren(answeringModel)
+                                        .addOnSuccessListener(CallingActivity.this, aVoid1 -> {
+                                            textViewCallingUser.setText("Calling…" + answeringUserModel.getNameSurname());
+                                            circleImageViewCloseCall.setEnabled(true);
+                                            setCallingState(CallingStateHelper.WAITING);
+                                        });
 
-                                }
                             });
                 }
             }
