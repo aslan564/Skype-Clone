@@ -15,6 +15,7 @@ private String userBio;
 private String profilePicturePath;
 private String uid;
 private String status;
+private String channel;
 
 public String getStatus() {
     return status;
@@ -32,12 +33,13 @@ public static Creator<UserModel> getCREATOR() {
 public UserModel() {
 }
 
-public UserModel(String nameSurname, String userBio, String profilePicturePath, String uid,String status) {
+public UserModel(String nameSurname, String userBio, String profilePicturePath, String uid,String status,String channel) {
     this.nameSurname = nameSurname;
     this.userBio = userBio;
     this.profilePicturePath = profilePicturePath;
     this.uid = uid;
     this.status = status;
+    this.channel = channel;
 }
 
 
@@ -59,6 +61,14 @@ public static final Creator<UserModel> CREATOR = new Creator<UserModel>() {
         return new UserModel[size];
     }
 };
+
+public String getChannel() {
+    return channel;
+}
+
+public void setChannel(String channel) {
+    this.channel = channel;
+}
 
 @NotNull
 @Override

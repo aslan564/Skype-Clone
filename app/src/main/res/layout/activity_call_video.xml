@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray"
-    tools:context=".activity.CallVideoActivity">
+    tools:context=".activity.CallingActivity">
 
     <ImageView
         android:id="@+id/callActivityUserProfileImage"
@@ -30,21 +30,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <Button
             android:id="@+id/circleImageViewOpenCall"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:background="@drawable/calling_button_back"
+            android:background="@drawable/ic_baseline_call_24"
             android:layout_marginEnd="50dp"
-            android:src="@drawable/ic_baseline_call_24"
-            android:visibility="gone" />
+            android:src="@drawable/calling_button_back"
+            android:visibility="gone"
+            tools:ignore="ButtonStyle" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <Button
             android:id="@+id/circleImageViewCloseCall"
             android:layout_width="70dp"
-            android:background="@drawable/calling_button_back"
+            android:background="@drawable/ic_baseline_call_end_24"
             android:layout_height="70dp"
-            android:src="@drawable/ic_baseline_call_end_24" />
+            android:enabled="false"
+            android:src="@drawable/calling_button_back"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 
     <TextView

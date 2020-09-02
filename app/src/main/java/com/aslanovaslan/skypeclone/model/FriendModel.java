@@ -1,5 +1,8 @@
 package com.aslanovaslan.skypeclone.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FriendModel {
     private  String nameSurname;
     private  String friendUid;
@@ -14,6 +17,13 @@ public FriendModel(String nameSurname, String friendUid, String state) {
     this.state = state;
 }
 
+public Map<String,Object>toMap(){
+    HashMap<String, Object> result = new HashMap<>();
+    result.put("nameSurname", this.nameSurname);
+    result.put("friendUid", this.friendUid);
+    result.put("state", this.state);
+    return result;
+}
 public String getNameSurname() {
     return nameSurname;
 }

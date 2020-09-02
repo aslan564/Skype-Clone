@@ -50,7 +50,7 @@ private UserModel eventBusUserModel;
 private FirebaseUser mUser;
 private DatabaseReference databaseReference;
 
-private UserModel otherUserModel=null;
+private UserModel otherUserModel = null;
 private static final String TAG = "ProfileActivity";
 
 @Override
@@ -93,8 +93,6 @@ private void setImageToProfile(final String userModelId) {
             }).addOnFailureListener(Throwable::printStackTrace);
 
 
-
-
 }
 
 @SuppressLint("SetTextI18n")
@@ -127,7 +125,7 @@ private void uiStateCheck(String state) {
     }
 }
 
-private void isState( final String otherUserId) {
+private void isState(final String otherUserId) {
     currentUserId = mUser.getUid();
     FirebaseDatabase.getInstance().getReference("friend_request")
             .child(currentUserId).child(otherUserId)
@@ -151,7 +149,7 @@ private void isState( final String otherUserId) {
                                         if (snapshot.exists() && snapshot.hasChildren()) {
                                             FriendModel friendModel = snapshot.getValue(FriendModel.class);
                                             if (friendModel != null) {
-                                                userRequestState= friendModel.getState();
+                                                userRequestState = friendModel.getState();
                                                 uiStateCheck(friendModel.getState());
                                             }
                                         } else {
@@ -250,9 +248,9 @@ private void checkButtonState() {
                         });
 
                     }).addOnFailureListener(e -> {
-                        e.printStackTrace();
-                        progressBarOtherProfile.setVisibility(View.GONE);
-                    });
+                e.printStackTrace();
+                progressBarOtherProfile.setVisibility(View.GONE);
+            });
         }
     } else {
         if (mUser != null) {
@@ -305,7 +303,6 @@ public void onMessageEvent(MessageEvent.MessageShareEvent event) {
     eventBusUserModel = event.getUserModel();
     Log.d("MessageEvent", "MessageEvent: " + eventBusUserModel);
 }
-
 
 
 @Override

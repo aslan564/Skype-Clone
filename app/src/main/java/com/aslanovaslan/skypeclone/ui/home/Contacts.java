@@ -15,26 +15,24 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.aslanovaslan.skypeclone.R;
 import com.aslanovaslan.skypeclone.RegisterActivity;
-import com.aslanovaslan.skypeclone.activity.CallVideoActivity;
+import com.aslanovaslan.skypeclone.activity.CallingActivity;
 import com.aslanovaslan.skypeclone.activity.FindPeopleActivity;
 import com.aslanovaslan.skypeclone.activity.ProfileActivity;
-import com.aslanovaslan.skypeclone.model.CallReceiverModel;
+import com.aslanovaslan.skypeclone.model.CallingModel;
 import com.aslanovaslan.skypeclone.model.FriendModel;
-import com.aslanovaslan.skypeclone.model.CallSenderModel;
 import com.aslanovaslan.skypeclone.model.UserModel;
 import com.aslanovaslan.skypeclone.util.BottomNavigationHelper;
 import com.aslanovaslan.skypeclone.util.glide.GlideApp;
 import com.aslanovaslan.skypeclone.util.internal.MessageEvent;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,10 +41,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.Map;
+import java.util.Objects;
 
 import static com.aslanovaslan.skypeclone.RegisterActivity.USER;
 import static com.aslanovaslan.skypeclone.activity.FindPeopleActivity.AA_SEND_VISIT_USER;
@@ -56,15 +60,12 @@ public class Contacts extends AppCompatActivity {
 
 public static final String AA_RECEIVER_CALL_USER = "AA_RECEIVER_CALL_USER";
 private Toolbar toolbar;
-private ProgressBar progressBarContactLoading;
-private RecyclerView recyclerViewContactsList;
 private ImageView imageViewContacts;
 private FirebaseUser mUser;
 private BottomNavigationView navView;
 private ContactAdapter contactAdapter;
-private static int AA_SELECTED_ITEM = 1;
-private FirebaseRecyclerOptions<FriendModel> firebaseRecyclerOptions;
-private DatabaseReference reference;
+private DatabaseReference mReferenceCalling;
+private static final String TAG = Contacts.class.getSimpleName();
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,7 @@ protected void onCreate(Bundle savedInstanceState) {
     });
 
     setBottomNav();
-    getCurrentUserData();
+
 
     contactAdapter.setOnItemClickListener((userKey, position) -> {
 
@@ -98,26 +99,29 @@ protected void onCreate(Bundle savedInstanceState) {
 
 }
 
-private void checkRingingState(final String uid) {
+private void initializeVariable() {
+    navView = findViewById(R.id.nav_view_main);
+    toolbar = findViewById(R.id.toolbar);
+    ProgressBar progressBarContactLoading = findViewById(R.id.progressBarContactLoading);
+    RecyclerView recyclerViewContactsList = findViewById(R.id.recyclerViewContactsList);
+    imageViewContacts = findViewById(R.id.imageViewContacts);
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    mUser = mAuth.getCurrentUser();
+    assert mUser != null;
+    String currentUserId = mUser.getUid();
+    recyclerViewContactsList.setHasFixedSize(true);
+    recyclerViewContactsList.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+    DatabaseReference query = FirebaseDatabase.getInstance().getReference("contacts");
 
-    reference.child(uid).addValueEventListener(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if (snapshot.hasChild("calling")) {
-                CallReceiverModel model = snapshot.getValue(CallReceiverModel.class);
-                if (model != null) {
-                    Intent intent = new Intent(Contacts.this, CallVideoActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    intent.putExtra(AA_RECEIVER_CALL_USER, model.getCalling());
-                    startActivity(intent);
-                }
-            }
-        }
+    FirebaseRecyclerOptions<FriendModel> firebaseRecyclerOptions = new FirebaseRecyclerOptions.Builder<FriendModel>().setQuery(query.child(currentUserId), FriendModel.class).build();
+    contactAdapter = new ContactAdapter(firebaseRecyclerOptions, Contacts.this, progressBarContactLoading);
+    recyclerViewContactsList.setAdapter(contactAdapter);
+    contactAdapter.notifyDataSetChanged();
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
+    mReferenceCalling = FirebaseDatabase.getInstance().getReference("calling");
+    FirebaseFirestore.getInstance().collection("users").document(currentUserId).update("channel", "");
 
-        }
-    });
+
 }
 
 @Override
@@ -125,8 +129,32 @@ protected void onStart() {
     super.onStart();
     contactAdapter.startListening();
     if (mUser != null) {
+        String currentUserID = mUser.getUid();
+        mReferenceCalling.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    if (snapshot.hasChild(currentUserID) && snapshot.child(currentUserID).hasChild("caller")) {
+                        String callingModel = Objects.requireNonNull(snapshot.child(currentUserID).child("caller").getValue()).toString();
+                        if (!callingModel.equals("")) {
+                            Intent intent = new Intent(Contacts.this, CallingActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                            intent.putExtra(AA_RECEIVER_CALL_USER, callingModel);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        Log.d(TAG, "onDataChange: zeng yoxu");
+                    }
+                } else {
+                    Log.i(TAG, "hele calling yaradilmiyib : ");
+                }
+            }
 
-        checkRingingState(mUser.getUid());
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d(TAG, "onCancelled: ");
+            }
+        });
     }
 }
 
@@ -148,25 +176,6 @@ public void onBackPressed() {
     finish();
 }
 
-private void initializeVariable() {
-    navView = findViewById(R.id.nav_view_main);
-    toolbar = findViewById(R.id.toolbar);
-    progressBarContactLoading = findViewById(R.id.progressBarContactLoading);
-    recyclerViewContactsList = findViewById(R.id.recyclerViewContactsList);
-    imageViewContacts = findViewById(R.id.imageViewContacts);
-    FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    mUser = mAuth.getCurrentUser();
-    assert mUser != null;
-    String currentUserId = mUser.getUid();
-    recyclerViewContactsList.setHasFixedSize(true);
-    recyclerViewContactsList.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-    DatabaseReference query = FirebaseDatabase.getInstance().getReference("contacts");
-    firebaseRecyclerOptions = new FirebaseRecyclerOptions.Builder<FriendModel>().setQuery(query.child(currentUserId), FriendModel.class).build();
-    contactAdapter = new ContactAdapter(firebaseRecyclerOptions, Contacts.this, progressBarContactLoading);
-    recyclerViewContactsList.setAdapter(contactAdapter);
-    contactAdapter.notifyDataSetChanged();
-    reference = FirebaseDatabase.getInstance().getReference("calling").child("receiver");
-}
 
 private void setBottomNav() {
     BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationHelper = BottomNavigationHelper.changeView(Contacts.this);
@@ -175,17 +184,7 @@ private void setBottomNav() {
     menuItem.setChecked(true);
 }
 
-private void getCurrentUserData() {
-    FirebaseFirestore.getInstance().collection("users").document(mUser.getUid())
-            .get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    UserModel userModel = documentSnapshot.toObject(UserModel.class);
-                    assert userModel != null;
 
-                    EventBus.getDefault().postSticky(new MessageEvent.MessageShareEvent(userModel));
-                }
-            }).addOnFailureListener(e -> e.printStackTrace());
-}
 }
 
 class ContactAdapter extends FirebaseRecyclerAdapter<FriendModel, ContactAdapter.ContactViewHolder> {
@@ -209,9 +208,10 @@ protected void onBindViewHolder(@NonNull ContactViewHolder holder, int position,
 }
 
 private void intentCallingActivity(View view, String key) {
-    Intent callActivityIntent = new Intent(activity, CallVideoActivity.class);
+    Intent callActivityIntent = new Intent(activity, CallingActivity.class);
     callActivityIntent.putExtra(AA_SEND_CALL_USER, key);
     activity.startActivity(callActivityIntent);
+    activity.finish();
 }
 
 private void setUserDataFromDatabase(final ContactViewHolder holder, String keyUserId, FriendModel friendModel) {
@@ -227,9 +227,9 @@ private void setUserDataFromDatabase(final ContactViewHolder holder, String keyU
                     }
                 }
             }).addOnFailureListener(e -> {
-                Log.d("ContactAdapter", "onFailure: " + e);
-                e.printStackTrace();
-            });
+        Log.d("ContactAdapter", "onFailure: " + e);
+        e.printStackTrace();
+    });
 
 }
 

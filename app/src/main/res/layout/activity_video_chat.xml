@@ -6,6 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".ui.videocating.VideoChatActivity">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/publisherFrameLayout"
+            android:layout_width="120dp"
+            android:layout_height="150dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/publisherFrameLayoutHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/subscriberFrameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <Chronometer
         android:id="@+id/callingTimerVideoChat"
         android:layout_width="match_parent"
@@ -17,43 +53,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
+
+    <Button
         android:id="@+id/imageViewCancelVideoCalling"
         android:layout_width="90dp"
         android:layout_height="90dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginStart="58dp"
+        android:enabled="false"
+        android:layout_marginBottom="70dp"
+        android:background="@drawable/ic_baseline_call_end_24"
+        android:contentDescription="@string/video_chat"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/publisherFrameLayout"
-        app:srcCompat="@drawable/ic_baseline_call_end_24"
-        android:contentDescription="@string/video_chat" />
+     />
 
-    <FrameLayout
-        android:id="@+id/publisherFrameLayout"
-        android:layout_width="120dp"
-        android:layout_height="150dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/publisherFrameLayoutHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="22sp" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/subscriberFrameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

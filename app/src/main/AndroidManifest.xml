@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".ui.videocating.VideoChatActivity" />
         <activity android:name=".author.AuthorActivity" />
-        <activity android:name=".activity.CallVideoActivity" />
+        <activity android:name=".activity.CallingActivity" />
         <activity android:name=".activity.ProfileActivity" />
         <activity android:name=".ui.notifications.NotificationActivity" />
         <activity android:name=".activity.FindPeopleActivity">

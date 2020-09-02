@@ -228,7 +228,7 @@ private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
 }
 private void addUserToFirestore(String uid) {
     userDocumentReference = FirebaseFirestore.getInstance().collection("users").document(uid);
-    userRegister=new UserModel("Customer","Your Bios Here","",uid, UserActivateStatus.ONLINE.name());
+    userRegister=new UserModel("Customer","Your Bios Here","",uid, UserActivateStatus.ONLINE.name(),"");
     userDocumentReference.set(userRegister).addOnSuccessListener(aVoid -> {
         Toast.makeText(RegisterActivity.this, "profile created", Toast.LENGTH_SHORT).show();
         progressBar.dismiss();

@@ -1,6 +1,7 @@
 package com.aslanovaslan.skypeclone.ui.notifications;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,8 +40,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -53,6 +57,7 @@ public class NotificationActivity extends AppCompatActivity {
 
 private FirebaseAuth mAuth;
 private FirebaseUser mUser;
+private DocumentReference mReference;
 private Query query;
 private String currentUserId;
 private BottomNavigationView navView;
@@ -90,6 +95,7 @@ private void initializeVariable() {
     currentUserId = mUser.getUid();
     query = FirebaseDatabase.getInstance().getReference("friend_request")
                     .child(currentUserId);
+    mReference = FirebaseFirestore.getInstance().collection("users").document(currentUserId);
 }
 
 private void setBottomNav() {
@@ -155,40 +161,37 @@ private void setUserData(final NotificationViewHolder holder, RequestModel reque
         holder.cardViewNotification.setVisibility(View.VISIBLE);
         holder.progressBarNotificationView.setVisibility(View.VISIBLE);
         FirebaseFirestore.getInstance().collection("users").document(keyUserId).get()
-                .addOnSuccessListener(NotificationActivity.this, new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        if (documentSnapshot != null && documentSnapshot.exists()) {
-                            final UserModel model = documentSnapshot.toObject(UserModel.class);
-                            if (model != null) {
-                                progressBarLoadNotificationData.setVisibility(View.GONE);
+                .addOnSuccessListener(NotificationActivity.this, documentSnapshot -> {
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        final UserModel model = documentSnapshot.toObject(UserModel.class);
+                        if (model != null) {
+                            progressBarLoadNotificationData.setVisibility(View.GONE);
 
-                                holder.userName.setText(model.getNameSurname());
-                                GlideApp.with(holder.itemView.getContext()).load(model.getProfilePicturePath()).placeholder(R.drawable.ic_baseline_person_pin_24)
-                                        .into(holder.userImage);
-                                holder.userImage.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        intentProfileActivity(keyUserId);
-                                    }
-                                });
-                                holder.accept.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
+                            holder.userName.setText(model.getNameSurname());
+                            GlideApp.with(holder.itemView.getContext()).load(model.getProfilePicturePath()).placeholder(R.drawable.ic_baseline_person_pin_24)
+                                    .into(holder.userImage);
+                            holder.userImage.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    intentProfileActivity(keyUserId);
+                                }
+                            });
+                            holder.accept.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
 
-                                        saveUserContacts(model,holder, keyUserId);
-                                    }
-                                });
-                                holder.cancel.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        holder.progressBarNotificationView.setVisibility(View.VISIBLE);
-                                        deleteUserFriendRequest(holder, keyUserId, false);
-                                    }
-                                });
-                                holder.progressBarNotificationView.setVisibility(View.GONE);
+                                    saveUserContacts(model,holder, keyUserId);
+                                }
+                            });
+                            holder.cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    holder.progressBarNotificationView.setVisibility(View.VISIBLE);
+                                    deleteUserFriendRequest(holder, keyUserId, false);
+                                }
+                            });
+                            holder.progressBarNotificationView.setVisibility(View.GONE);
 
-                            }
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -235,12 +238,9 @@ private void deleteUserFriendRequest(final NotificationViewHolder holder, String
             });
 
         }
-    }).addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            e.printStackTrace();
-            holder.progressBarNotificationView.setVisibility(View.GONE);
-        }
+    }).addOnFailureListener(e -> {
+        e.printStackTrace();
+        holder.progressBarNotificationView.setVisibility(View.GONE);
     });
 
 
@@ -257,28 +257,35 @@ private void saveUserContacts(UserModel model, final NotificationViewHolder hold
                                                       .child(mUser.getUid());
     FriendModel senderFriendModel =
             new FriendModel(model.getNameSurname(), model.getUid(), StateRequest.FRIENDS.name());
-    contactSender.setValue(senderFriendModel)
-            .addOnSuccessListener(NotificationActivity.this, new OnSuccessListener<Void>() {
 
-                @Override
-                public void onSuccess(Void aVoid) {
-                    FriendModel receiverFriendModel = new FriendModel(eventBusUserModel.getNameSurname(), eventBusUserModel.getUid(), StateRequest.FRIENDS.name());
-                    contactReceiver.setValue(receiverFriendModel).addOnSuccessListener(NotificationActivity.this, new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(NotificationActivity.this,  "contact added ", Toast.LENGTH_SHORT).show();
-                            holder.progressBarNotificationView.setVisibility(View.GONE);
-                        }
-                    });
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
+    mReference.addSnapshotListener(NotificationActivity.this, new EventListener<DocumentSnapshot>() {
         @Override
-        public void onFailure(@NonNull Exception e) {
-            e.printStackTrace();
-            holder.progressBarNotificationView.setVisibility(View.GONE);
+        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+            if (error != null) {
+                error.printStackTrace();
+            } else {
+                if (value != null && value.exists() && value.getData() != null) {
+                    UserModel currentUserModel = value.toObject(UserModel.class);
+                    if (currentUserModel != null) {
+                        contactSender.updateChildren(senderFriendModel.toMap())
+                                .addOnSuccessListener(NotificationActivity.this, aVoid -> {
+                                    FriendModel receiverFriendModel =
+                                            new FriendModel(currentUserModel.getNameSurname(), currentUserModel.getUid(), StateRequest.FRIENDS.name());
+                                    contactReceiver.updateChildren(receiverFriendModel.toMap()).addOnSuccessListener(NotificationActivity.this, aVoid1 -> {
+                                        Toast.makeText(NotificationActivity.this,  "contact added ", Toast.LENGTH_SHORT).show();
+                                        holder.progressBarNotificationView.setVisibility(View.GONE);
+                                    });
+
+                                }).addOnFailureListener(e -> {
+                            e.printStackTrace();
+                            holder.progressBarNotificationView.setVisibility(View.GONE);
+                        });
+                    }
+                }
+            }
         }
     });
+
 
 }
 
