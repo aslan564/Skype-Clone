@@ -29,6 +29,7 @@ import com.aslanovaslan.skypeclone.model.CallingModel;
 import com.aslanovaslan.skypeclone.model.FriendModel;
 import com.aslanovaslan.skypeclone.model.UserModel;
 import com.aslanovaslan.skypeclone.util.BottomNavigationHelper;
+import com.aslanovaslan.skypeclone.util.CallingStateHelper;
 import com.aslanovaslan.skypeclone.util.glide.GlideApp;
 import com.aslanovaslan.skypeclone.util.internal.MessageEvent;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -135,17 +136,22 @@ protected void onStart() {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     if (snapshot.hasChild(currentUserID) && snapshot.child(currentUserID).hasChild("caller")) {
-                        String callingModel = Objects.requireNonNull(snapshot.child(currentUserID).child("caller").getValue()).toString();
-                        if (!callingModel.equals("")) {
+                        String callingUser = Objects.requireNonNull(snapshot.child(currentUserID).child("caller").getValue()).toString();
+                        if (!callingUser.equals("")) {
                             Intent intent = new Intent(Contacts.this, CallingActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            intent.putExtra(AA_RECEIVER_CALL_USER, callingModel);
+                            intent.putExtra(AA_RECEIVER_CALL_USER, callingUser);
                             startActivity(intent);
                             finish();
                         }
-                    } else {
-                        Log.d(TAG, "onDataChange: zeng yoxu");
+                    } else if (snapshot.hasChild(currentUserID) && snapshot.child(currentUserID).hasChild("state")) {
+                        String callingState = Objects.requireNonNull(snapshot.child(currentUserID).child("state").getValue()).toString();
+                        if (callingState.equals(CallingStateHelper.CLOSE.name())) {
+                            mReferenceCalling.child(currentUserID).removeValue();
+                            Log.i(TAG, "hele calling silindi : ");
+
+                        }
                     }
-                } else {
+                }else {
                     Log.i(TAG, "hele calling yaradilmiyib : ");
                 }
             }

@@ -135,14 +135,14 @@ protected void onStart() {
 
         if (userCallerKey != null) {
             String currentUserKey = mUser.getUid();
-           /* callingRef.addValueEventListener(new ValueEventListener() {
+            callingRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        if (callingState.equals(CallingStateHelper.CLOSE)) {
-                            if (snapshot.hasChild(currentUserKey)) {
-                                Log.i(TAG, "onDataChange: zeng olunur");
-                            } else {
+
+                        if (snapshot.hasChild(currentUserKey)) {
+                            String state = Objects.requireNonNull(snapshot.child(currentUserKey).child("state").getValue()).toString();
+                            if (state.equals(CallingStateHelper.CLOSE.name())) {
                                 intentContactActivity();
                             }
                         }
@@ -156,7 +156,7 @@ protected void onStart() {
                 public void onCancelled(@NonNull DatabaseError error) {
                     Log.d(TAG, "onCancelled: " + error);
                 }
-            });*/
+            });
             documentReference.document(currentUserKey).addSnapshotListener(CallingActivity.this, (value, error) -> {
                 if (error != null) {
                     Log.e(TAG, "onEvent: ", error);
@@ -184,18 +184,19 @@ protected void onStart() {
             });
 
         }
-      /*  if (answeringUserId != null) {
+        if (answeringUserId != null) {
             String currentUserKey = mUser.getUid();
             callingRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
 
-                        if (callingState.equals(CallingStateHelper.CLOSE)) {
-                            if (!snapshot.hasChild(currentUserKey)) {
-                                intentContactActivity();
+                            if (snapshot.hasChild(currentUserKey)) {
+                                String state = Objects.requireNonNull(snapshot.child(currentUserKey).child("state").getValue()).toString();
+                                if (state.equals(CallingStateHelper.CLOSE.name())) {
+                                    intentContactActivity();
+                                }
                             }
-                        }
 
                     } else {
                         Log.d(TAG, "yaradilmiyib: ");
@@ -209,7 +210,7 @@ protected void onStart() {
             });
 
 
-        }*/
+        }
     }
 }
 
@@ -325,6 +326,28 @@ public void onClick(View view) {
     }
 }
 
+private void setCallingState(CallingStateHelper state) {
+    String currentUserID = mUser.getUid();
+    final Map<String, Object> callingModel = new HashMap<>();
+    if (state.equals(CallingStateHelper.CLOSE)) {
+        callingModel.put("state", CallingStateHelper.CLOSE);
+        talkingRef.child(currentUserID).updateChildren(callingModel).addOnSuccessListener(CallingActivity.this, new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                intentContactActivity();
+            }
+        });
+
+    } else if (state.equals(CallingStateHelper.OPEN)) {
+        callingModel.put("state", CallingStateHelper.OPEN);
+        talkingRef.child(currentUserID).updateChildren(callingModel);
+    }
+    else if (state.equals(CallingStateHelper.WAITING)) {
+        callingModel.put("state", CallingStateHelper.WAITING);
+        talkingRef.child(currentUserID).updateChildren(callingModel);
+    }
+}
+
 private void intentToVideoCallActivity() {
     callingState = CallingStateHelper.OPEN;
     Intent intentVideoCallAct = new Intent(CallingActivity.this, VideoChatActivity.class).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -341,28 +364,31 @@ private void deleteCallerAndRinging(boolean b) {
             if (snapshot.hasChild(currentUser)) {
                 if (snapshot.child(currentUser).hasChild("answering")) {
 
-                    String answeringID = Objects.requireNonNull(snapshot.child(currentUser).child("answering").getValue()).toString();
-                    // String state = Objects.requireNonNull(snapshot.child(currentUser).child("state").getValue()).toString();
-                    callingRef.child(currentUser).removeValue();
-                    callingRef.child(answeringID).removeValue();
-                    if (!b) {
-                        //callingState = CallingStateHelper.valueOf(state);
+                    final Map<String, Object> callingModel = new HashMap<>();
+                    callingModel.put("state", CallingStateHelper.CLOSE);
 
+                    String answeringID = Objects.requireNonNull(snapshot.child(currentUser).child("answering").getValue()).toString();
+                    callingRef.child(currentUser).removeValue();
+
+                    if (!b) {
+                        callingRef.child(answeringID).setValue(callingModel);
                         intentContactActivity();
                     } else {
+                        callingRef.child(answeringID).removeValue();
                         intentToVideoCallActivity();
                     }
                 } else if (snapshot.child(currentUser).hasChild("caller")) {
+                    final Map<String, Object> callingModel = new HashMap<>();
+                    callingModel.put("state", CallingStateHelper.CLOSE);
 
                     String callerID = Objects.requireNonNull(snapshot.child(currentUser).child("caller").getValue()).toString();
-                    //String state = Objects.requireNonNull(snapshot.child(currentUser).child("state").getValue()).toString();
                     callingRef.child(currentUser).removeValue();
-                    callingRef.child(callerID).removeValue();
-                    if (!b) {
-                        //callingState = CallingStateHelper.valueOf(state);
 
+                    if (!b) {
+                        callingRef.child(callerID).setValue(callingModel);
                         intentContactActivity();
                     } else {
+                        callingRef.child(callerID).removeValue();
                         intentToVideoCallActivity();
                     }
                 } else {
@@ -415,7 +441,7 @@ private void setCallingAndRinging(final UserModel answeringUserModel) {
                                                 public void onSuccess(Void aVoid) {
                                                     textViewCallingUser.setText("Calling…" + answeringUserModel.getNameSurname());
                                                     circleImageViewCloseCall.setEnabled(true);
-                                                    callingState = CallingStateHelper.WAITING;
+                                                    setCallingState(CallingStateHelper.WAITING);
                                                 }
                                             });
 
